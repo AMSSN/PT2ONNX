@@ -6,12 +6,7 @@ import onnx
 from PIL import Image
 import matplotlib.pyplot as plt
 from torch import nn
-
-from models.crnn.crnn_models import CRNN
-from models.dbnet.dbnet_model import DBNet
-
 from onnxsim import simplify
-
 from models.efficientnet.model import EfficientNet
 
 
@@ -152,53 +147,5 @@ def convert_efficientnet():
     model_sim(output_path)
 
 
-def convert_crnn():
-    output_path = './output/crnn.onnx'
-    input_shape = (32, 360)
-    device = torch.device("cpu")
-    model = CRNN(img_h=32, nc=3, n_class=9464, nh=256)
-    checkpoint = torch.load("./weights/crnn.pth", device)
-    if "state_dict" in checkpoint.keys():
-        state_dict = checkpoint["state_dict"]
-    else:
-        state_dict = checkpoint
-    state_dict = {key.replace("module.", ""): value for key, value in state_dict.items()}
-    model.load_state_dict(state_dict, strict=False)
-    model.eval()
-    # # ------------------------------------------#
-    # #   pth模型转换为onnx模型，转换完成后，可注释掉
-    model_convert_onnx(model, input_shape, output_path, device)
-    print("model convert onnx finsh.")
-    #   第一轮验证
-    onnx_model = onnx.load(output_path)
-    onnx.checker.check_model(onnx_model)
-    print("第一轮验证：onnx model check_1 finsh.")
-
-    # # -------------------------#
-    # #   第二轮验证
-    # # 初始化onnx模型
-    # ort_session_1 = onnxruntime.InferenceSession(output_path)
-    # check_onnx_2(model, ort_session_1, input_shape, device)
-    # print("onnx model check_2 finsh.")
-
-    # -------------------------#
-    #   第三轮验证
-    # load image
-    # img_path = "./data/label1.jpg"
-    # assert os.path.exists(img_path), "file: '{}' dose not exist.".format(img_path)
-    # img = Image.open(img_path)
-    # plt.imshow(img)
-    # # # read class_indict
-    # # 加载onnx模型
-    # ort_session_2 = onnxruntime.InferenceSession(output_path)
-    # check_onnx_3(ort_session_2, img, input_shape)
-    # print("onnx model check_3 finsh.")
-
-    # -------------------------#
-    #   进行模型精简
-    model_sim(output_path)
-
-
 if __name__ == '__main__':
     convert_efficientnet()
-    # convert_crnn()
