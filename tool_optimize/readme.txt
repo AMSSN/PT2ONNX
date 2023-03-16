@@ -1,3 +1,5 @@
+
+
 ./ncnnoptimize crnn.param crnn.bin newcrnn.param newcrnn.bin 1
 
 ./ncnnoptimize dbnet.param dbnet.bin newdbnet.param newdbnet.bin 1
